@@ -1,4 +1,5 @@
 <?php
+include_once "dbutils.php";
 include_once "jwt.php";
 
 $SecretKey = "SuperSecretKeyDontShare";
@@ -13,6 +14,11 @@ function createToken($payload) {
     return $jwt;
 }
 function validateJwt($token,$time=false,$aud=NULL) {
+    
+    $payload = get_jwt_payload();
+    $sql = "UPDATE " . $logintable . " SET transactions = transactions + 1 WHERE id = ? and token = ?";
+    $params = array($payload->data->id, $token);	
+    $row = PrepareExecSQL($sql,"s",$params);
     return validate_jwt($token,$time,$aud);
 }
 
@@ -20,6 +26,7 @@ function validateJwt($token,$time=false,$aud=NULL) {
 $usertable = "users";
 $userroletable = "userrole";
 $permissionstable = "rolepermissions";
+$logintable = "logins";
 $profiletable = ""; // optional
 $passwordlength = 12;
 

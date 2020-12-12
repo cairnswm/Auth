@@ -46,6 +46,9 @@ try {
             $jwt = createToken(array("id" => $id,"firstname" => $firstname,"lastname" => $lastname,"permissions" => $permissions)); 
             $res = json_encode(array("message" => "Login succeded.","id" => $id,"firstname" => $firstname,"lastname" => $lastname,"token" => $jwt,"permissions" => $permissions));
             // TODO: Record the key so that we can use it for future auto-login
+            $sql = "INSERT into ".$logintable." (userid, token) values (?, ?)";
+            $params = array($id, $jwt);	
+            $permissions = PrepareExecSQL($sql,"ss",$params);
         } else {
             array_push($errors,array("message" => "Login failed, invalid email or password"));
         }        

@@ -93,6 +93,9 @@ try {
             $token = createToken(array("id" => $id,"firstname" => $firstName,"lastname" => $lastName)); // Do not create token if user must first verify their emial before being able to login. A Token indicates they are logged in
             $res = json_encode(array("message" => "User was successfully registered.","userid" => $id,"firstname" => $firstName,"lastname" => $lastName,"token"=>$token,"permissions"=>array()));            
             
+            $sql = "INSERT into ".$logintable." (userid, token) values (?, ?)";
+            $params = array($id, $token);	
+            $permissions = PrepareExecSQL($sql,"ss",$params);
             // TODO Send Verification/Welcome Email
 
             EndTransaction();
