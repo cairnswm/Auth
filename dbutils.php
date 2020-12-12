@@ -21,10 +21,10 @@ else
 
 $mysqli = null;
 $config = Array(
-"database" => Array("server" => 'dbserver', 
-					"username" => 'username', 
-					"password" => 'password', 
-          "database" => 'database')
+"database" => Array("server" => 'localhost', 
+					"username" => 'auth', 
+					"password" => 'auth', 
+          "database" => 'auth')
 );
                     
 if ($mysqli == null)
@@ -35,8 +35,18 @@ if ($mysqli == null)
 		}
   }  
 
-
-
+function BeginTransaction() {
+  global $mysqli;
+  mysqli_begin_transaction($mysqli);
+}  
+function EndTransaction() {
+  global $mysqli;
+  mysqli_commit($mysqli);
+}
+function RollbackTransaction() {
+  global $mysqli;
+  mysqli_commit($mysqli);
+}
 
 function PrepareExecSQL($sql, $pars = '', $params = [])
 {	

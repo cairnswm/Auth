@@ -59,6 +59,10 @@ if ($email == "")
     array_push($errors,array("message" => "Email is Required."));
     $canRegister = false;
 }
+if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    array_push($errors,array("message" => "Invalid email format."));
+    $canRegister = false;
+}
 if ($confirm == "" || $confirm != $password)
 {
     array_push($errors,array("message" => "Passwords do not match."));
@@ -67,51 +71,36 @@ if ($confirm == "" || $confirm != $password)
 
 try {
     if ($canRegister) {
+        BeginTransaction();
         // Check if email exists
         $sql = "SELECT id FROM " . $usertable . " WHERE email = ?";
         $params = array($email);
         $row = PrepareExecSQL($sql,"s",$params);
-        if ($row[0]["id"] > 0) {
+        if (count($row) > 0) {
             throw new Exception('EMail has already been registered.');
         }
 
-        $sql = "INSERT INTO " . $usertable . " SET first_name = ?, last_name = ?, email = ?, password = ?";
+        $sql = "INSERT INTO " . $usertable . " SET firstname = ?, lastname = ?, email = ?, password = ?, verificationcode = ?";
         
         $password_hash = crypt($password, $PasswordHaskKey);
-        $params = array( $firstName,$lastName,$email,$password_hash);
+        $params = array( $firstName,$lastName,$email,$password_hash,randomPassword(20));
         //echo $sql;
         //var_dump($params);
-        $id = PrepareExecSQL($sql,"ssss",$params);
+        $id = PrepareExecSQL($sql,"sssss",$params);
         //echo "User ID: ".$id;
         if ($id > 0) {
             
-            $token = createToken(array("id" => $id,"firstname" => $firstName,"lastname" => $lastName));
-            $res = json_encode(array("message" => "User was successfully registered.","userid" => $id,"firstname" => $firstName,"lastname" => $lastName,"token"=>$token,"permissions"=>array()));
+            $token = createToken(array("id" => $id,"firstname" => $firstName,"lastname" => $lastName)); // Do not create token if user must first verify their emial before being able to login. A Token indicates they are logged in
+            $res = json_encode(array("message" => "User was successfully registered.","userid" => $id,"firstname" => $firstName,"lastname" => $lastName,"token"=>$token,"permissions"=>array()));            
+            
+            // TODO Send Verification/Welcome Email
 
-            // create profileid
-            if ($profiletable != "") {
-                $sql = "INSERT INTO " + $profiletable + " SET name = ?";
-                $name = $firstName.' '.$lastName;
-                $params = array($name);
-                $profileid = PrepareExecSQL($sql,"s",$params);
-                if ($profileid > 0) {
-                    $sql = "UPDATE ".$table_name." SET profileid = ? where id = ?";
-                    $params = array($profileid,$id);
-                    $profileid = PrepareExecSQL($sql,"ss",$params);
-                    http_response_code(200);
-                } else {
-                    //echo "No profile created";
-                    array_push($errors,array("message" => "Could not create user."));
-                    array_push($errors,array("dberror" => lastError()));
-                }
-            }
-            else {
-                // TODO Create info here is a different profile table is used for personal info
-            }
+            EndTransaction();
         } else {
             //echo "user not created in table";
             array_push($errors,array("message" => "Could not create user."));
             array_push($errors,array("dberror" => lastError()));
+            RollbackTransaction();
         }
     }
     else
@@ -126,7 +115,6 @@ catch(Exception $e) {
 if (count($errors) > 0) {
     $res = json_encode(array("errors" => $errors));
 } 
-
 
 echo $res;
 

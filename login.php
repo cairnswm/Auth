@@ -21,7 +21,7 @@ if (isset($_GET["password"])) $password = $_GET["password"];
 if (isset( $data->email)) $email = $data->email;
 if (isset( $data->password)) $password = $data->password;
 
-$sql = "SELECT id, first_name, last_name, password FROM " . $usertable . " WHERE email = ? LIMIT 0,1";
+$sql = "SELECT id, firstname, lastname, password FROM " . $usertable . " WHERE email = ? LIMIT 0,1";
 $params = array($email);	
 $row = PrepareExecSQL($sql,"s",$params);
 
@@ -29,8 +29,8 @@ try {
     if (count($row) == 1) {
         $row = $row[0];
         $id = $row['id'];
-        $firstname = $row['first_name'];
-        $lastname = $row['last_name'];
+        $firstname = $row['firstname'];
+        $lastname = $row['lastname'];
         $password2 = $row['password'];
 
         $password_hash = crypt($password, $PasswordHaskKey);

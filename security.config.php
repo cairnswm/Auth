@@ -2,8 +2,8 @@
 include_once "jwt.php";
 
 $SecretKey = "SuperSecretKeyDontShare";
-$PasswordHaskKey = 'AnotherSuperSecretForHashingPasswords';
-$defaultConfig = array("issuer"=>"View360","subject"=>"user logged in","audience"=>"view360 web client");
+$PasswordHaskKey = 'AnotherSuperSecretForHashingPasswordsThatShouldBeKeptSecret';
+$defaultConfig = array("issuer"=>"GlyndwrCovidProject","subject"=>"user logged in","audience"=>"GlyndwrCovidWebsite");
 
 function createToken($payload) {    
     global $SecretKey;
@@ -23,8 +23,8 @@ $permissionstable = "rolepermissions";
 $profiletable = ""; // optional
 $passwordlength = 12;
 
-function randomPassword($len) {
-    $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'; // Arr special chars if wanted
+function randomPassword($len = 10) {
+    $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890'; // Add special chars if wanted
     $pass = array(); // declare $pass as an array
     $alphaLength = strlen($alphabet) - 1; 
     for ($i = 0; $i < $len; $i++) {
